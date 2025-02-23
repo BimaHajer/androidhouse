@@ -7,8 +7,9 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -36,15 +38,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
+import com.example.renteazy.ui.theme.Purple40
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,86 +66,64 @@ fun RegisterScreen() {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
-    var showSuccessDialog by remember { mutableStateOf(false) } // Gérer l'affichage de la boîte de dialogue
+    var showSuccessDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(Color.White),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val painter = rememberAsyncImagePainter(R.drawable.register) // Vérifie si l'image existe
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Purple40, shape = RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp))
+                .padding(vertical = 34.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.f8),
+                contentDescription = "Image d'accueil",
+                modifier = Modifier.size(300.dp)
+            )
+        }
 
-        Image(
-            painter = painter,
-            contentDescription = "Logo",
-            modifier = Modifier.size(300.dp)
-        )
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text(
             text = "Inscription",
             color = MaterialTheme.colorScheme.primary,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        CustomOutlinedTextField(name, { name = it }, "Nom complet", Icons.Filled.Person)
+        CustomOutlinedTextField(email, { email = it }, "Email", Icons.Filled.Email, KeyboardType.Email)
+        CustomOutlinedTextField(password, { password = it }, "Mot de passe", Icons.Filled.Lock, visualTransformation = PasswordVisualTransformation())
+        CustomOutlinedTextField(phone, { phone = it }, "Téléphone", Icons.Filled.Phone, KeyboardType.Phone)
 
-        CustomOutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = "Nom complet",
-            icon = Icons.Filled.Person
-        )
-
-        CustomOutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = "Email",
-            icon = Icons.Filled.Email,
-            keyboardType = KeyboardType.Email
-        )
-
-        CustomOutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = "Mot de passe",
-            icon = Icons.Filled.Lock,
-            visualTransformation = PasswordVisualTransformation()
-        )
-
-        CustomOutlinedTextField(
-            value = phone,
-            onValueChange = { phone = it },
-            label = "Téléphone",
-            icon = Icons.Filled.Phone,
-            keyboardType = KeyboardType.Phone
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = {
-                if (name.isBlank() || email.isBlank() || password.isBlank() || phone.isBlank()) {
-                    Toast.makeText(context, "Tous les champs sont obligatoires", Toast.LENGTH_SHORT).show()
-                } else {
-                    val sharedPreferences = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-                    sharedPreferences.edit().apply {
-                        putString("email", email)
-                        putString("password", password)
-                        apply()
-                    }
-                    Toast.makeText(context, "Inscription réussie !", Toast.LENGTH_SHORT).show()
-                    context.startActivity(Intent(context, Login::class.java))
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("S'inscrire")
-        }
+                if (!validateInputs(context, name, email, password, phone)) return@Button
 
-        Spacer(modifier = Modifier.height(8.dp))
+                val sharedPreferences = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+                sharedPreferences.edit().apply {
+                    putString("email", email)
+                    putString("password", password)
+                    apply()
+                }
+
+                showSuccessDialog = true
+            },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(50.dp)
+        ) {
+            Text("S'inscrire", color = Color.White)
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -149,13 +131,12 @@ fun RegisterScreen() {
             text = "Déjà un compte ? Se connecter",
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.clickable {
-                context.startActivity(Intent(context, Login::class.java)) // Vérifie si Login existe
-            }
+            modifier = Modifier
+                .clickable { context.startActivity(Intent(context, Login::class.java)) }
+                .padding(bottom = 32.dp)
         )
     }
 
-    // Boîte de dialogue de succès
     if (showSuccessDialog) {
         AlertDialog(
             onDismissRequest = { showSuccessDialog = false },
@@ -164,13 +145,34 @@ fun RegisterScreen() {
             confirmButton = {
                 Button(onClick = {
                     showSuccessDialog = false
-                    context.startActivity(Intent(context, Login::class.java)) // Redirection vers login
+                    context.startActivity(Intent(context, Login::class.java))
                 }) {
                     Text("OK")
                 }
             }
         )
     }
+}
+
+fun validateInputs(context: Context, name: String, email: String, password: String, phone: String): Boolean {
+    if (name.isBlank() || !name.matches("^[a-zA-Z\\s]+$".toRegex())) {
+        Toast.makeText(context, "Nom invalide", Toast.LENGTH_SHORT).show()
+        return false
+    }
+    if (email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        Toast.makeText(context, "Email invalide", Toast.LENGTH_SHORT).show()
+        return false
+    }
+    if (password.length < 8 || !password.matches(".*[A-Z].*".toRegex()) ||
+        !password.matches(".*[0-9].*".toRegex()) || !password.matches(".*[!@#\$%^&*].*".toRegex())) {
+        Toast.makeText(context, "Mot de passe non conforme", Toast.LENGTH_SHORT).show()
+        return false
+    }
+    if (!phone.matches("^(?:\\+216|216)?[0-9]{8}$".toRegex())) {
+        Toast.makeText(context, "Numéro de téléphone invalide", Toast.LENGTH_SHORT).show()
+        return false
+    }
+    return true
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -187,15 +189,12 @@ fun CustomOutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
-        leadingIcon = {
-            Icon(imageVector = icon, contentDescription = null)
-        },
+        leadingIcon = { Icon(imageVector = icon, contentDescription = null) },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp, horizontal = 16.dp),
         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = keyboardType),
         visualTransformation = visualTransformation,
         singleLine = true,
-
-        )
+    )
 }

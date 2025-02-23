@@ -51,13 +51,39 @@ android {
 }
 
 dependencies {
+    implementation ("androidx.compose.material3:material3:1.0.0")
+    implementation ("androidx.compose.ui:ui:1.4.0")
+    implementation ("androidx.compose.foundation:foundation:1.4.0")
+    implementation ("androidx.compose.material3:material3:1.1.0")
+    implementation ("androidx.compose.foundation:foundation:1.5.0")
+
+    implementation ("androidx.compose.material3:material3:1.2.0")
+    implementation ("androidx.compose.ui:ui:1.6.0")
+    implementation ("com.google.accompanist:accompanist-permissions:0.31.1-alpha")
+
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.31.1-alpha")
+    implementation ("androidx.compose.ui:ui:1.3.0")
+    implementation ("androidx.compose.material3:material3:1.0.1")
+    implementation ("androidx.compose.material:material-icons-extended:1.3.0")
+    implementation( "androidx.activity:activity-compose:1.6.0")
+    implementation ("androidx.compose.ui:ui-tooling-preview:1.3.0")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.3.0")
+    implementation ("io.coil-kt:coil-compose:2.4.0") // Version de Coil
+    implementation ("io.coil-kt:coil-gif:2.4.0") // Module GIF pour Coil
     implementation ("androidx.compose.material3:material3:1.2.0")
     implementation ("androidx.compose.ui:ui:1.5.4")
     implementation ("androidx.compose.foundation:foundation:1.5.4")
 
 
     implementation("androidx.compose.material3:material3:1.2.0")
-        val composeBom = platform("androidx.compose:compose-bom:2024.10.01")
+    implementation(libs.androidx.navigation.runtime.android)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.firebase.crashlytics.buildtools)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.core)
+    val composeBom = platform("androidx.compose:compose-bom:2024.10.01")
         implementation(composeBom)
         androidTestImplementation(composeBom)
         // Choose one of the following:

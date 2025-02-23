@@ -2,7 +2,6 @@ package com.example.renteazy
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContent
@@ -13,35 +12,23 @@ import androidx.compose.animation.core.animateIntOffset
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apartment
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,16 +47,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -77,99 +64,33 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.example.renteazy.ui.theme.RentEazyTheme
 
-class HomeActivity : ComponentActivity() {
+class HomeBailleurActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            RentEazyTheme {
-                val houses = listOf(
-                    House(1, R.drawable.house_3, "Maison moderne", 500, 4.5f),
-                    House(2, R.drawable.house_1, "Appartement spacieux", 300, 4.0f),
-                    // Ajoutez plus de maisons ici
-                )
-
-                val buttons = listOf(
-                    ButtonData("Home", Icons.Default.Home),
-                    ButtonData("Chat", Icons.Default.Chat),
-                    ButtonData("Maps", Icons.Default.Map),
-                    ButtonData("Settings", Icons.Default.Settings),
-                )
-
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Column {
-                        ToNavBar(
-                            title = "Renteazy",
-                            notificationIcon = Icons.Default.Notifications,
-                            onNotificationClick = {
-                                println("Notification icon clicked!")
-                            }
-                        )
-                        SearchBar()
-                        PropertyTypeSection()
-                        HouseList(houses = houses, onHouseClick = { house ->
-                            val intent = Intent(this@HomeActivity, DetailHouseActivity::class.java)
-                            intent.putExtra("house", house)
-                            startActivity(intent)
-                        })
-                    }
-
-                    AnimatedNavigation(
-                        buttons = buttons,
-                        barColor = Color.White,
-                        circleColor = Color(0xFF9B59B6),
-                        selectedColor = Color.White,
-                        unselectedColor = Color.Gray,
-                    )
-                }
-            }
-        }
-    }
-}
-
-// Modèle de données pour une maison
-data class House(
-    val id: Int,
-    val image: Int, // Ressource drawable
-    val title: String,
-    val price: Int, // Prix en dinars
-    val rating: Float // Nombre d'étoiles
-) : Parcelable {
-    // Implémentation de Parcelable
-    override fun describeContents(): Int = 0
-
-    override fun writeToParcel(dest: android.os.Parcel, flags: Int) {
-        dest.writeInt(id)
-        dest.writeInt(image)
-        dest.writeString(title)
-        dest.writeInt(price)
-        dest.writeFloat(rating)
-    }
-
-    companion object CREATOR : Parcelable.Creator<House> {
-        override fun createFromParcel(parcel: android.os.Parcel): House {
-            return House(
-                parcel.readInt(),
-                parcel.readInt(),
-                parcel.readString()!!,
-                parcel.readInt(),
-                parcel.readFloat()
+            val buttons = listOf(
+                ButtonData("Home", Icons.Default.Home),
+                ButtonData("Chat", Icons.Default.Chat),
+                ButtonData("Publier", Icons.Default.Add),
+                ButtonData("History", Icons.Default.DateRange),
+                ButtonData("Settings", Icons.Default.Settings),
+            )
+            AnimatedNavigationBar(
+                buttons = buttons,
+                barColor = Color.White,
+                circleColor = Color(0xFF9B59B6),
+                selectedColor = Color.White,
+                unselectedColor = Color.Gray,
             )
         }
-
-        override fun newArray(size: Int): Array<House?> {
-            return arrayOfNulls(size)
-        }
     }
 }
 
-// Modèle de données pour les boutons de navigation
-data class ButtonDat(val text: String, val icon: ImageVector)
+data class ButtonData(val text: String, val icon: ImageVector)
 
-// Barre de navigation animée
 @Composable
-fun AnimatedNavigation(
+fun AnimatedNavigationBar(
     buttons: List<ButtonData>,
     barColor: Color,
     circleColor: Color,
@@ -177,7 +98,7 @@ fun AnimatedNavigation(
     unselectedColor: Color,
 ) {
     val circleRadius = 26.dp
-    val context = LocalContext.current
+    val context = LocalContext.current // Contexte pour les Intent
 
     var selectedItem by rememberSaveable { mutableIntStateOf(0) }
     var barSize by remember { mutableStateOf(IntSize(0, 0)) }
@@ -210,10 +131,10 @@ fun AnimatedNavigation(
         },
         label = "circle offset"
     ) {
-        IntOffset(it.toInt() - circleRadiusPx, 2500)
+        IntOffset(it.toInt() - circleRadiusPx, 2500) // Positionner le cercle en bas (y=0)
     }
     val barShape = remember(cutoutOffset) {
-        BarShap(
+        BarShape(
             offset = cutoutOffset,
             circleRadius = circleRadius,
             cornerRadius = 25.dp,
@@ -221,8 +142,19 @@ fun AnimatedNavigation(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize() // Cela permet à la Box de prendre toute la taille de l'écran
     ) {
+        // Ajouter la TopNavBar ici
+        TopNavBar(
+            title = "Renteazy",
+            notificationIcon = Icons.Default.Notifications,
+            onNotificationClick = {
+                // Gérer le clic sur l'icône de notification
+                println("Notification icon clicked!")
+            },
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
+
         Circle(
             modifier = Modifier
                 .offset { circleOffset }
@@ -241,7 +173,7 @@ fun AnimatedNavigation(
                 }
                 .fillMaxWidth()
                 .background(barColor)
-                .align(Alignment.BottomCenter),
+                .align(Alignment.BottomCenter), // Alignement de la barre en bas
             horizontalArrangement = Arrangement.SpaceAround,
         ) {
             buttons.forEachIndexed { index, button ->
@@ -250,11 +182,11 @@ fun AnimatedNavigation(
                     selected = isSelected,
                     onClick = {
                         selectedItem = index
+                        // Ajouter la navigation vers SettingActivity
                         if (button.text == "Settings") {
                             val intent = Intent(context, SettingsActivity::class.java)
                             context.startActivity(intent)
                         }
-
                     },
                     icon = {
                         val iconAlpha by animateFloatAsState(
@@ -281,9 +213,8 @@ fun AnimatedNavigation(
     }
 }
 
-// Barre supérieure
 @Composable
-fun ToNavBar(
+fun TopNavBar(
     title: String,
     notificationIcon: ImageVector,
     onNotificationClick: () -> Unit,
@@ -312,184 +243,27 @@ fun ToNavBar(
     }
 }
 
-// Barre de recherche
-@Composable
-fun SearchBar(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        BasicTextField(
-            value = "",
-            onValueChange = {},
-            modifier = Modifier
-                .weight(1f)
-                .background(Color.White, RoundedCornerShape(16.dp))
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            decorationBox = { innerTextField ->
-                if (true) {
-                    Text("Rechercher...", color = Color.Gray)
-                }
-                innerTextField()
-            }
-        )
-        IconButton(onClick = { /* Gérer le clic sur le bouton de filtrage */ }) {
-            Icon(
-                imageVector = Icons.Default.FilterList,
-                contentDescription = "Filtres",
-                tint = Color.Black
-            )
-        }
-    }
-}
-
-// Section des types de propriétés
-@Composable
-fun PropertyTypeSection(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        PropertyTypeButton(icon = Icons.Default.Home, text = "Maison")
-        PropertyTypeButton(icon = Icons.Default.Apartment, text = "Appartement")
-    }
-}
-
-@Composable
-fun PropertyTypeButton(icon: ImageVector, text: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(8.dp)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = text,
-            modifier = Modifier.size(40.dp),
-            tint = Color.Black
-        )
-        Text(text = text, style = MaterialTheme.typography.bodySmall)
-    }
-}
-
-// Liste des maisons
-@Composable
-fun HouseList(houses: List<House>, onHouseClick: (House) -> Unit) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        items(houses) { house ->
-            HouseItem(house = house, onClick = { onHouseClick(house) })
-        }
-    }
-}
-
-@Composable
-fun HouseItem(house: House, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column {
-            Image(
-                painter = painterResource(id = house.image),
-                contentDescription = house.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                contentScale = ContentScale.Crop
-            )
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = house.title, style = MaterialTheme.typography.titleMedium)
-                Text(text = "${house.price} DT", style = MaterialTheme.typography.bodyLarge)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Rating",
-                        tint = Color.Yellow,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(text = house.rating.toString(), style = MaterialTheme.typography.bodySmall)
-                }
-            }
-        }
-    }
-}
-
-// Page de détails d'une maison
-class HouseDetailActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            val house = intent.getParcelableExtra<House>("house")
-            if (house != null) {
-                HouseDetailScreen(house = house)
-            }
-        }
-    }
-}
-
-@Composable
-fun HouseDetailScreen(house: House) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Image(
-            painter = painterResource(id = house.image),
-            contentDescription = house.title,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp),
-            contentScale = ContentScale.Crop
-        )
-        Text(text = house.title, style = MaterialTheme.typography.headlineMedium)
-        Text(text = "${house.price} DT", style = MaterialTheme.typography.titleLarge)
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = "Rating",
-                tint = Color.Yellow,
-                modifier = Modifier.size(24.dp)
-            )
-            Text(text = house.rating.toString(), style = MaterialTheme.typography.bodyLarge)
-        }
-    }
-}
-
-// Forme personnalisée pour la barre de navigation
-private class BarShap(
+private class BarShape(
     private val offset: Float,
     private val circleRadius: Dp,
     private val cornerRadius: Dp,
     private val circleGap: Dp = 5.dp,
 ) : Shape {
+
     override fun createOutline(
-        size: androidx.compose.ui.geometry.Size,
+        size: Size,
         layoutDirection: LayoutDirection,
         density: Density
     ): Outline {
         return Outline.Generic(getPath(size, density))
     }
 
-    private fun getPath(size: androidx.compose.ui.geometry.Size, density: Density): androidx.compose.ui.graphics.Path {
+    private fun getPath(size: Size, density: Density): Path {
         val cutoutCenterX = offset
         val cutoutRadius = density.run { (circleRadius + circleGap).toPx() }
         val cornerRadiusPx = density.run { cornerRadius.toPx() }
         val cornerDiameter = cornerRadiusPx * 2
-        return androidx.compose.ui.graphics.Path().apply {
+        return Path().apply {
             val cutoutEdgeOffset = cutoutRadius * 1.5f
             val cutoutLeftX = cutoutCenterX - cutoutEdgeOffset
             val cutoutRightX = cutoutCenterX + cutoutEdgeOffset
@@ -554,7 +328,6 @@ private class BarShap(
     }
 }
 
-// Cercle animé pour la barre de navigation
 @Composable
 private fun Circle(
     modifier: Modifier = Modifier,
